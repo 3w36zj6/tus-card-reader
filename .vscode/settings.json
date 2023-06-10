@@ -1,0 +1,23 @@
+{
+  // Formatter
+  "editor.codeActionsOnSave": {
+    // isort
+    "source.organizeImports": true
+  },
+  "editor.formatOnSave": true,
+  "python.formatting.blackArgs": [],
+  "python.formatting.provider": "black",
+  // Linter
+  "python.linting.enabled": true,
+  "python.linting.flake8Enabled": true,
+  "python.linting.flake8Args": [],
+  "python.linting.lintOnSave": true,
+  "python.linting.pylintEnabled": false,
+  // Tester
+  "python.testing.pytestArgs": ["tests"],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  // Pylance
+  "python.languageServer": "Pylance",
+  "python.analysis.typeCheckingMode": "basic"
+}
