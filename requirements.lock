@@ -7,3 +7,8 @@
 #   all-features: false
 
 -e file:.
+libusb1==3.0.0
+ndeflib==0.3.3
+nfcpy==1.0.4
+pydes==2.0.1
+pyserial==3.5
