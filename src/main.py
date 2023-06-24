@@ -1,17 +1,27 @@
 import datetime
+import os
 import sys
 from typing import Self, cast
 
 import nfc  # type: ignore
+import requests
 from nfc.tag import TagCommandError  # type: ignore
 from nfc.tag.tt3 import BlockCode, ServiceCode, Type3Tag  # type: ignore
 from nfc.tag.tt3_sony import FelicaStandard  # type: ignore
 from rich.console import Console
 
+console = Console(record=True)
+
 SYSTEM_NAME = "Tokyo University of Science student ID card"
 SYSTEM_CODE = 0x8A0F
+ENDPOINT_URL = os.environ.get("ENDPOINT_URL")
 
-console = Console(record=True)
+if ENDPOINT_URL is None:
+    console.print(
+        "[bold bright_yellow]WARNING",
+        "[white]The environment variable [bold]ENDPOINT_URL[/bold] is not set.",
+        sep="\t",
+    )
 
 
 class CardReader:
@@ -64,6 +74,30 @@ class CardReader:
                         f"[b]Student Name:[/b] [white underline not b]{student_name}",
                         sep="\t",
                     )
+                    if not (ENDPOINT_URL is None):
+                        try:
+                            requests.post(
+                                ENDPOINT_URL,
+                                json={"student_id": student_id},
+                            )
+                        except requests.exceptions.ConnectionError:
+                            console.log(
+                                "[bold bright_red]ERROR",
+                                "[white]Failed to connect to the server.",
+                                sep="\t",
+                            )
+                        except requests.exceptions.RequestException:
+                            console.log(
+                                "[bold bright_red]ERROR",
+                                "[white]Failed to send data to the server.",
+                                sep="\t",
+                            )
+                        else:
+                            console.log(
+                                "[bold bright_green]SUCCESS",
+                                "[white]Sent data to the server.",
+                                sep="\t",
+                            )
                 else:
                     console.log(
                         "[bold bright_red]ERROR",
