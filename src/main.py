@@ -102,7 +102,14 @@ class CardReader:
         # Random Service 106: write with key & read w/o key (0x1A88 0x1A8B)
         # 0x00000:
         student_id_bytearray = self.__read_data_block(tag, cast(ServiceCode, 106), cast(BlockCode, 0))
-        return student_id_bytearray.decode("shift_jis")[2:9]
+        role_classification = student_id_bytearray.decode("shift_jis")[0:2]
+        match role_classification:
+            case "01" | "02":  # student
+                return student_id_bytearray.decode("shift_jis")[2:9]
+            case "11":  # faculty
+                return student_id_bytearray.decode("shift_jis")[2:8]
+            case _:  # unknown
+                raise Exception(f"Unknown role classification: {role_classification}")
 
     def __get_student_name(self: Self, tag: Type3Tag) -> str:
         # Random Service 106: write with key & read w/o key (0x1A88 0x1A8B)
