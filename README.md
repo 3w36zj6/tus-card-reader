@@ -42,3 +42,11 @@ source .venv/bin/activate
 ```sh
 python src/main.py
 ```
+
+環境変数`ENDPOINT_URL`を設定することで、読み取ったカードの情報を以下の形式でWebサーバーに送信(POST)できます。
+
+```json
+{
+  "student_id": "1234567"
+}
+```
