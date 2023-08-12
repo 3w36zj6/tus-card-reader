@@ -40,13 +40,7 @@ class CardReader:
         console.print("[bold green]Hold your student ID card on the card reader...")
         try:
             while True:
-                self.clf.connect(
-                    rdwr={
-                        "on-connect": self.__on_connect,
-                        "on-release": self.__on_release,
-                        "iterations": 1,
-                    }
-                )
+                self.clf.connect(rdwr={"on-connect": self.__on_connect, "on-release": self.__on_release})
         except Exception:  # Ctrl+C
             console.save_html(f"./log/log_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.html")
             sys.exit(0)
@@ -126,16 +120,16 @@ class CardReader:
             sep="\t",
         )
 
-    def __read_data_block(self: Self, tag: Type3Tag, service_code: ServiceCode, block_code: BlockCode) -> bytearray:
-        service_code = ServiceCode(service_code, 0b001011)
-        block_code = BlockCode(block_code)
+    def __read_data_block(self: Self, tag: Type3Tag, service_code_number: int, block_code_number: int) -> bytearray:
+        service_code = ServiceCode(service_code_number, 0b001011)
+        block_code = BlockCode(block_code_number)
         read_bytearray = cast(bytearray, tag.read_without_encryption([service_code], [block_code]))
         return read_bytearray
 
     def __get_student_id(self: Self, tag: Type3Tag) -> str:
         # Random Service 106: write with key & read w/o key (0x1A88 0x1A8B)
         # 0x00000:
-        student_id_bytearray = self.__read_data_block(tag, cast(ServiceCode, 106), cast(BlockCode, 0))
+        student_id_bytearray = self.__read_data_block(tag, 106, 0)
         role_classification = student_id_bytearray.decode("shift_jis")[0:2]
         match role_classification:
             case "01" | "02":  # student
@@ -148,7 +142,7 @@ class CardReader:
     def __get_student_name(self: Self, tag: Type3Tag) -> str:
         # Random Service 106: write with key & read w/o key (0x1A88 0x1A8B)
         # 0x00010:
-        student_name_bytearray = self.__read_data_block(tag, cast(ServiceCode, 106), cast(BlockCode, 1))
+        student_name_bytearray = self.__read_data_block(tag, 106, 1)
         return student_name_bytearray.decode("shift_jis")[0:16]
 
     def __dump_tag(self: Self, tag: nfc.tag.Tag) -> str:
