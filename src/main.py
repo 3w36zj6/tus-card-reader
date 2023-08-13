@@ -55,6 +55,7 @@ class CardReader:
             try:
                 self.__dump_tag(tag)
                 if isinstance(tag, FelicaStandard) and SYSTEM_CODE in tag.request_system_code():
+                    tag.idm, tag.pmm, *_ = tag.polling(0xFE00)
                     student_id = self.__get_student_id(tag)
                     student_name = self.__get_student_name(tag)
                     console.log(
