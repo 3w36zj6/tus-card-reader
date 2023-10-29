@@ -5,6 +5,7 @@ dependencies = [
     "nfcpy~=1.0.4",
     "rich~=13.4.2",
     "requests~=2.31.0",
+    "types-requests~=2.31.0.10",
 ]
 requires-python = ">= 3.11"
 
@@ -15,27 +16,23 @@ build-backend = "hatchling.build"
 [tool.black]
 line-length = 120
 
-[tool.isort]
-line_length = 120
-multi_line_output = 3
-include_trailing_comma = true
-use_parentheses = true
+[tool.ruff]
+line-length = 120
+select = ["ALL"]
+ignore = ["CPY", "EXE", "T20", "E203", "E501"]
 
 [tool.rye]
 managed = true
 dev-dependencies = [
     "black~=23.3.0",
-    "isort~=5.12.0",
-    "flake8~=5.0.4",
-    "flake8-annotations~=2.9.1",
-    "pep8-naming~=0.13.3",
+    "ruff~=0.0.287",
     "mypy~=1.3.0",
     "pytest~=7.3.2",
 ]
 
 [tool.rye.scripts]
-format = { chain = ["black src", "isort src"] }
-lint = { chain = ["black --check src", "flake8 src", "mypy src"] }
+format = { chain = ["black src", "ruff check --fix src"] }
+lint = { chain = ["black --check src", "ruff check src", "mypy src"] }
 test = { chain = ["python -m pytest tests"] }
 
 [tool.hatch.metadata]
