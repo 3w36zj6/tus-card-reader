@@ -3,11 +3,11 @@ import os
 import sys
 from typing import Self, cast
 
-import nfc  # type: ignore
+import nfc  # type: ignore[import]
 import requests
-from nfc.tag import TagCommandError  # type: ignore
-from nfc.tag.tt3 import BlockCode, ServiceCode, Type3Tag  # type: ignore
-from nfc.tag.tt3_sony import FelicaStandard  # type: ignore
+from nfc.tag import TagCommandError  # type: ignore[import]
+from nfc.tag.tt3 import BlockCode, ServiceCode, Type3Tag  # type: ignore[import]
+from nfc.tag.tt3_sony import FelicaStandard  # type: ignore[import]
 from rich.console import Console
 
 console = Console(record=True)
@@ -31,8 +31,8 @@ class CardReader:
         try:
             try:
                 self.clf = nfc.ContactlessFrontend("usb")
-            except Exception as e:
-                raise e
+            except Exception:
+                raise
         except Exception:
             console.print_exception()
 
@@ -69,11 +69,12 @@ class CardReader:
                         f"[b]Student Name:[/b] [white underline not b]{student_name}",
                         sep="\t",
                     )
-                    if not (ENDPOINT_URL is None):
+                    if ENDPOINT_URL is not None:
                         try:
                             requests.post(
                                 ENDPOINT_URL,
                                 json={"student_id": student_id},
+                                timeout=6,
                             )
                         except requests.exceptions.ConnectionError:
                             console.log(
@@ -108,7 +109,7 @@ class CardReader:
                     )
 
                 else:
-                    raise e
+                    raise
         except Exception:
             console.print_exception()
 
@@ -124,8 +125,7 @@ class CardReader:
     def __read_data_block(self: Self, tag: Type3Tag, service_code_number: int, block_code_number: int) -> bytearray:
         service_code = ServiceCode(service_code_number, 0b001011)
         block_code = BlockCode(block_code_number)
-        read_bytearray = cast(bytearray, tag.read_without_encryption([service_code], [block_code]))
-        return read_bytearray
+        return cast(bytearray, tag.read_without_encryption([service_code], [block_code]))
 
     def __get_student_id(self: Self, tag: Type3Tag) -> str:
         # Random Service 106: write with key & read w/o key (0x1A88 0x1A8B)
@@ -138,7 +138,8 @@ class CardReader:
             case "11":  # faculty
                 return student_id_bytearray.decode("shift_jis")[2:8]
             case _:  # unknown
-                raise Exception(f"Unknown role classification: {role_classification}")
+                msg = f"Unknown role classification: {role_classification}"
+                raise Exception(msg)
 
     def __get_student_name(self: Self, tag: Type3Tag) -> str:
         # Random Service 106: write with key & read w/o key (0x1A88 0x1A8B)
