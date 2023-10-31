@@ -50,3 +50,5 @@ python src/main.py
   "student_id": "1234567"
 }
 ```
+
+さらに環境変数`SUCCESS_SOUND_PATH`を設定することで、送信に成功した際に音声ファイルを再生できます。音声ファイルは[playsound](https://github.com/TaylorSMarks/playsound)でサポートされた形式である必要があります。

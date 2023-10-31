@@ -8,6 +8,7 @@ import requests
 from nfc.tag import TagCommandError  # type: ignore[import]
 from nfc.tag.tt3 import BlockCode, ServiceCode, Type3Tag  # type: ignore[import]
 from nfc.tag.tt3_sony import FelicaStandard  # type: ignore[import]
+from playsound import playsound
 from rich.console import Console
 
 console = Console(record=True)
@@ -15,11 +16,18 @@ console = Console(record=True)
 SYSTEM_NAME = "Tokyo University of Science student ID card"
 SYSTEM_CODE = 0x8A0F
 ENDPOINT_URL = os.environ.get("ENDPOINT_URL")
+SUCCESS_SOUND_PATH = os.environ.get("SUCCESS_SOUND_PATH")
 
 if ENDPOINT_URL is None:
     console.print(
         "[bold bright_yellow]WARNING",
         "[white]The environment variable [bold]ENDPOINT_URL[/bold] is not set.",
+        sep="\t",
+    )
+if SUCCESS_SOUND_PATH is None:
+    console.print(
+        "[bold bright_yellow]WARNING",
+        "[white]The environment variable [bold]SUCCESS_SOUND_PATH[/bold] is not set.",
         sep="\t",
     )
 
@@ -94,6 +102,8 @@ class CardReader:
                                 "[white]Sent data to the server.",
                                 sep="\t",
                             )
+                            if SUCCESS_SOUND_PATH is not None:
+                                playsound(SUCCESS_SOUND_PATH, block=False)
                 else:
                     console.log(
                         "[bold bright_red]ERROR",
