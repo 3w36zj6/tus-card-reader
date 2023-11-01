@@ -21,7 +21,7 @@ line-length = 120
 [tool.ruff]
 line-length = 120
 select = ["ALL"]
-ignore = ["CPY", "EXE", "T20", "E203", "E501"]
+ignore = ["CPY", "EXE", "T20", "E203", "E501", "D203", "D212"]
 
 [tool.mypy]
 strict = true
