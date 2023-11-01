@@ -1,6 +1,8 @@
+"""Main module."""
 import datetime
 import os
 import sys
+import zoneinfo
 from typing import Self, cast
 
 import nfc  # type: ignore[import]
@@ -32,28 +34,36 @@ if SUCCESS_SOUND_PATH is None:
     )
 
 
+class UnknownRoleClassificationError(Exception):
+    """Error when card is classified with unknown role."""
+
+
 class CardReader:
+    """Card reader class."""
+
     clf: nfc.ContactlessFrontend
 
     def __init__(self: Self) -> None:
+        """Initialize card reader."""
         try:
-            try:
-                self.clf = nfc.ContactlessFrontend("usb")
-            except Exception:
-                raise
-        except Exception:
+            self.clf = nfc.ContactlessFrontend("usb")
+        except Exception:  # noqa: BLE001
             console.print_exception()
 
     def read(self: Self) -> None:
+        """Wait for card reading."""
         console.print("[bold green]Hold your student ID card on the card reader...")
         try:
             while True:
                 self.clf.connect(rdwr={"on-connect": self.__on_connect, "on-release": self.__on_release})
-        except Exception:  # Ctrl+C
-            console.save_html(f"./log/log_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.html")
+        except Exception:  # noqa: BLE001
+            # Ctrl+C
+            console.save_html(
+                f"""./log/log_{datetime.datetime.now(tz=zoneinfo.ZoneInfo(key="Asia/Tokyo")).strftime('%Y%m%d%H%M%S')}.html""",
+            )
             sys.exit(0)
 
-    def __on_connect(self: Self, tag: nfc.tag.Tag) -> bool:
+    def __on_connect(self: Self, tag: nfc.tag.Tag) -> bool:  # noqa: PLR0912
         console.log(
             "[bold bright_cyan]INFO",
             f"Connected to the card with Manufacture ID of [underline]{tag.identifier.hex().upper()}[/underline].",
@@ -110,7 +120,7 @@ class CardReader:
                         f"[white]The card is not {SYSTEM_NAME}.",
                         sep="\t",
                     )
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 if issubclass(type(e), TagCommandError):
                     console.log(
                         "[bold bright_red]ERROR",
@@ -120,7 +130,7 @@ class CardReader:
 
                 else:
                     raise
-        except Exception:
+        except Exception:  # noqa: BLE001
             console.print_exception()
 
         return True
@@ -149,7 +159,7 @@ class CardReader:
                 return student_id_bytearray.decode("shift_jis")[2:8]
             case _:  # unknown
                 msg = f"Unknown role classification: {role_classification}"
-                raise Exception(msg)
+                raise UnknownRoleClassificationError(msg)
 
     def __get_student_name(self: Self, tag: Type3Tag) -> str:
         # Random Service 106: write with key & read w/o key (0x1A88 0x1A8B)
